@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 
-// ---------- helpers ----------
+
 const api = async (path, method = 'GET', body) => {
   const res = await fetch('/api' + path, {
     method,
@@ -12,7 +12,7 @@ const api = async (path, method = 'GET', body) => {
   return data;
 };
 
-// tiny toast notification
+
 function toast(msg, ok = true) {
   const el = document.createElement('div');
   el.className = 'toast ' + (ok ? 'ok' : 'err');
@@ -21,7 +21,7 @@ function toast(msg, ok = true) {
   setTimeout(() => el.remove(), 3000);
 }
 
-// debounce hook: waits until user stops typing
+
 function useDebounce(value, delay = 400) {
   const [v, setV] = useState(value);
   useEffect(() => {
@@ -31,7 +31,7 @@ function useDebounce(value, delay = 400) {
   return v;
 }
 
-// client-side validation rules (same as backend)
+
 const rules = {
   name: (v = '') => (v.length >= 20 && v.length <= 60) || 'Name must be 20-60 characters',
   email: (v = '') => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v) || 'Enter a valid email',
@@ -39,7 +39,7 @@ const rules = {
   address: (v = '') => v.length <= 400 || 'Max 400 characters',
 };
 
-// ---------- components ----------
+
 function Stars({ value = 0, onPick }) {
   const [hover, setHover] = useState(0);
   return (
@@ -160,7 +160,7 @@ const PasswordForm = () => (
   </details>
 );
 
-// ---------- dashboards ----------
+
 function Admin() {
   const [stats, setStats] = useState({});
   const [tick, setTick] = useState(0); // refresh lists after adding
@@ -247,7 +247,7 @@ function Owner() {
   );
 }
 
-// ---------- app shell ----------
+
 export default function App() {
   const [user, setUser] = useState(() => JSON.parse(localStorage.user || 'null'));
   const [mode, setMode] = useState('login');
