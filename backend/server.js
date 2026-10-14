@@ -28,7 +28,7 @@ const wrap = (fn) => (req, res) =>
     res.status(e.status || 500).json({ error: e.status ? e.message : 'Server error' });
   });
 
-// ---------- validation ----------
+
 const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PASS = /^(?=.*[A-Z])(?=.*[^A-Za-z0-9]).{8,16}$/;
 function validate({ name, email, address, password }, needPassword = true) {
@@ -39,7 +39,7 @@ function validate({ name, email, address, password }, needPassword = true) {
     throw bad('Password: 8-16 chars, 1 uppercase, 1 special character');
 }
 
-// ---------- auth ----------
+
 const auth = (...roles) => (req, res, next) => {
   try {
     const token = (req.headers.authorization || '').replace('Bearer ', '');
@@ -51,7 +51,7 @@ const auth = (...roles) => (req, res, next) => {
   }
 };
 
-// Builds WHERE (LIKE filters) and ORDER BY (whitelisted columns) from query string
+
 function filterSort(req, filters, sorts, params = []) {
   const where = [];
   for (const k in filters) {
@@ -73,7 +73,7 @@ const createUser = async (b, role) => {
   return { id: r.insertId, name: b.name, email: b.email, address: b.address || '', role };
 };
 
-// ---------- common ----------
+
 app.post('/api/signup', wrap(async (req, res) => res.status(201).json(await createUser(req.body, 'USER'))));
 
 app.post('/api/login', wrap(async (req, res) => {
@@ -90,7 +90,7 @@ app.put('/api/password', auth(), wrap(async (req, res) => {
   res.json({ message: 'Password updated' });
 }));
 
-// ---------- admin ----------
+
 app.get('/api/admin/stats', auth('ADMIN'), wrap(async (req, res) => {
   const c = async (t) => (await q(`SELECT COUNT(*) AS c FROM ${t}`))[0].c;
   res.json({ users: await c('users'), stores: await c('stores'), ratings: await c('ratings') });
@@ -125,7 +125,7 @@ app.get('/api/admin/stores', auth('ADMIN'), wrap(async (req, res) => {
     FROM stores s LEFT JOIN ratings r ON r.store_id=s.id ${where} GROUP BY s.id ${order}`, params));
 }));
 
-// ---------- normal user ----------
+
 app.get('/api/stores', auth('USER'), wrap(async (req, res) => {
   const f = { name: 's.name', address: 's.address' };
   const { where, order, params } = filterSort(req, f, { ...f, rating: 'rating' }, [req.user.id]);
@@ -135,7 +135,7 @@ app.get('/api/stores', auth('USER'), wrap(async (req, res) => {
     FROM stores s LEFT JOIN ratings r ON r.store_id=s.id ${where} GROUP BY s.id ${order}`, params));
 }));
 
-// submit or modify (upsert)
+
 app.post('/api/stores/:id/rating', auth('USER'), wrap(async (req, res) => {
   const rating = +req.body.rating;
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) throw bad('Rating must be 1 to 5');
@@ -144,7 +144,7 @@ app.post('/api/stores/:id/rating', auth('USER'), wrap(async (req, res) => {
   res.json({ message: 'Rating saved' });
 }));
 
-// ---------- store owner ----------
+
 app.get('/api/owner/dashboard', auth('OWNER'), wrap(async (req, res) => {
   const raters = await q(`SELECT u.name,u.email,s.name AS store,r.rating FROM ratings r
     JOIN users u ON u.id=r.user_id JOIN stores s ON s.id=r.store_id WHERE s.owner_id=?`, [req.user.id]);
@@ -153,7 +153,7 @@ app.get('/api/owner/dashboard', auth('OWNER'), wrap(async (req, res) => {
   res.json({ average: avg[0].average || 0, raters });
 }));
 
-// ---------- startup: create tables + default admin ----------
+
 (async () => {
   await q(fs.readFileSync(__dirname + '/schema.sql', 'utf8'));
   const email = 'admin@example.com';
